@@ -41,6 +41,7 @@ def tf_iou(box1, box2):
     overlap_area = tf.reshape(iou_point, [tf.shape(box1)[0], tf.shape(box2)[0]])
     return overlap_area
 
+
 def convert_deltas_to_boxes(box_deltas, anchors, box_delta_means, box_delta_stds):
     """
     Converts box deltas, which are in parameterized form (ty, tx, th, tw) as
@@ -110,5 +111,5 @@ def tf_convert_deltas_to_boxes(box_deltas, anchors, box_delta_means, box_delta_s
     # y2, x2                        
     boxes_bottom_right = center + 0.5 * size     
     # [ (N,2), (N,2) ] -> (N,4)                 
-    boxes = tf.concat([ boxes_top_left, boxes_bottom_right ], axis = 1) 
+    boxes = tf.concat([boxes_top_left, boxes_bottom_right], 1) 
     return boxes
