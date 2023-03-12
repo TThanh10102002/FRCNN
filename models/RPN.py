@@ -110,7 +110,7 @@ class RegionProposalNetwork(tf.keras.Model):
         box_deltas = tf.reshape(box_delta_map, shape = (height * width * num_anchors, 4))           # [N,4], predicted box delta regression targets
 
         anchors_valid = tf.squeeze(anchors_valid)                                                   # [N,]
-        scores = tf.squeez(scores)                                                                  # [N,]
+        scores = tf.squeeze(scores)                                                                  # [N,]
 
         if allow_edge_proposals:
             # Use all proposals
