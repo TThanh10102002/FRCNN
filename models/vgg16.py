@@ -1,5 +1,4 @@
 import tensorflow as tf
-import tensorlfow.keras
 from tensorflow.keras import Model
 from tensorflow.keras.layers import Conv2D, MaxPooling2D
 from tensorflow.keras.initializers import GlorotNormal
