@@ -266,7 +266,7 @@ class PrecisionRecallCurveCalculator:
         _, average_precisions = zip(*sorted_results)   #unzip
 
         #Maximum width of any class name (for pretty printing)
-        label_width = maxx([len(label) for label in labels])
+        label_width = max([len(label) for label in labels])
 
         #Pretty print
         print("Average Precisions")
