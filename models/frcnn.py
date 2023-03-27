@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 import tensorflow.keras
 from tensorflow.keras import Model
-from tensorflow.keras import Lambda
+from tensorflow.keras.layers import Lambda
 
 from . import vgg16
 from . import RPN
