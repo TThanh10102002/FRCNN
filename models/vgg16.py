@@ -31,7 +31,7 @@ class FeatureExtractor(tf.keras.Model):
 
         self._block5_conv1 = Conv2D(filters = 512, kernel_size = 3, strides = 1, padding = 'same', activation = 'relu', kernel_initializer = initial_weights, kernel_regularizer = regularizer, name = 'block5_conv1')
         self._block5_conv2 = Conv2D(filters = 512, kernel_size = 3, strides = 1, padding = 'same', activation = 'relu', kernel_initializer = initial_weights, kernel_regularizer = regularizer, name = 'block5_conv2')
-        self._block5_conv3 = Conv2D(filters = 512, kernel_size = 3, strides = 1, padđing = 'same', activation = 'relu', kernel_initializer = initial_weights, kernel_regularizer = regularizer, name = 'block5_conv3')
+        self._block5_conv3 = Conv2D(filters = 512, kernel_size = 3, strides = 1, padding = 'same', activation = 'relu', kernel_initializer = initial_weights, kernel_regularizer = regularizer, name = 'block5_conv3')
 
     def call(self, input_img):
         y = self._block1_conv1(input_img)
