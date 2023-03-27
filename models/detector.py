@@ -1,6 +1,6 @@
 import tensorflow as tf
 from tensorflow import keras
-import keras
+from keras import Model
 from keras.layers import Dense, Dropout, Flatten, Lambda, TimeDistributed
 from keras import backend as K
 from keras.regularizers import L2
