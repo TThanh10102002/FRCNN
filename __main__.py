@@ -352,7 +352,7 @@ if __name__ == "__main__":
     #Construct model and load initial weights
     model = frcnn.FasterRCNN(
         num_classes = voc.Dataset.num_classes,
-        allow_edge_proposals = not options.excule_edge_proposals,
+        allow_edge_proposals = not options.exclude_edge_proposals,
         custom_roi_pool = options.custom_roi_pool,
         activate_class_outputs = not options.detector_logits,
         l2 = 0.5 * options.weight_decay,
