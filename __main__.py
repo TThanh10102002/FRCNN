@@ -74,7 +74,7 @@ def _sample_rpn_minibatch(rpn_map, obj_indices, background_indices, rpn_minibatc
     num_pos_anchors = len(pos_anchors)
     num_neg_anchors = len(neg_anchors)
     num_pos_samples = min(rpn_minibatch_size // 2, num_pos_anchors)     #up to half the samples should be positive, if possible
-    num_neg_samples = rpn_minibatch_size - rpn_pos_samples              #the rest should be negative
+    num_neg_samples = rpn_minibatch_size - num_pos_samples              #the rest should be negative
     pos_anchor_indexes = random.sample(range(num_pos_anchors), num_pos_samples)
     neg_anchor_indexes = random.sample(range(num_neg_anchors), num_neg_samples)
 
