@@ -80,7 +80,7 @@ class RegionProposalNetwork(tf.keras.Model):
         proposals_top_left = tf.maximum(proposals[:, 0:2], 0.0)
         proposals_y2 = tf.reshape(tf.minimum(proposals[:,2], img_height), shape = (-1, 1))
         proposals_x2 = tf.reshape(tf.minimum(proposals[:,3], img_width), shape = (-1, 1))
-        proposals = tf.concat([proposals_top_left, proposals_y2, proposals_x2], 1)
+        proposals = tf.concat([proposals_top_left, proposals_y2, proposals_x2], axis = 1)
 
         # Remove anything less than 16 pixels on a side
         height = proposals[:, 2] - proposals[:, 0]
