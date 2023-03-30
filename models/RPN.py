@@ -160,7 +160,7 @@ class RegionProposalNetwork(tf.keras.Model):
         N_cls = tf.cast(tf.math.count_nonzero(y_mask), dtype = tf.float32) + K.epsilon()
 
         # Compute element-wise loss for all anchors
-        loss_all_anchors = tf.keras.metrics.binary_crossentropy(y_true_class, y_pred_class)
+        loss_all_anchors = tf.keras.losses.BinaryCrossentropy()(y_true_class, y_pred_class)
 
         # Zero out the ones which should not have been included
         loss_terms = y_mask * loss_all_anchors
