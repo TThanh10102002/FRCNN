@@ -31,7 +31,7 @@ class RegionProposalNetwork(tf.keras.Model):
         # Box delta regression
         self._rpn_boxes = Conv2D(4 * anchors_per_location, 1, 1, 'same', activation = None, kernel_initializer = initial_weights, name = 'rpn_boxes')
 
-    def __call__(self, inputs, train):
+    def __call__(self, inputs, training):
         # Unpack inputs
         input_img = inputs[0]
         feature_map = inputs[1]
