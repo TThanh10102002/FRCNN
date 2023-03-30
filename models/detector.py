@@ -64,7 +64,7 @@ class DetectorNet(Model):
             pool = tf.expand_dims(pool, axis = 0)
             
         flatten_layer = self._flatten(pool)
-        if train and self._dropout != 0:
+        if training and self._dropout != 0:
             fc1 = self._fc1(flatten_layer)
             dropout1 = self._dropout1(fc1)
             fc2 = self._fc2(dropout1)
