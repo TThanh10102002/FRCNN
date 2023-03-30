@@ -40,7 +40,7 @@ class RegionProposalNetwork(tf.keras.Model):
         assert len(feature_map.shape) == 4
 
         # Proposal sampling depends on whether we are training or not
-        if train:
+        if training:
             max_proposals_pre_nms = self.max_proposals_pre_nms_train
             max_proposals_post_nms = self.max_proposals_post_nms_train
         else:
