@@ -73,7 +73,7 @@ class FasterRCNN(tf.keras.Model):
                                                                             training = training)
 
         #Losses
-        if train:
+        if training:
             rpn_class_loss = self._stage2_region_proposal_network.class_loss(y_pred = rpn_scores, gt_rpn_map = gt_rpn_map)
             rpn_reg_loss = self._stage2_region_proposal_network.reg_loss(y_pred = rpn_box_deltas, gt_rpn_map = gt_rpn_map)
             detector_class_loss = self._stage3_detector_network.class_loss(y_pred = detector_classes, y_true = gt_classes, from_logits = not self._activate_class_outputs)
