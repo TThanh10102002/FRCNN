@@ -25,7 +25,7 @@ class FasterRCNN(tf.keras.Model):
                                                              activate_class_outputs = activate_class_outputs,
                                                              l2 = l2, dropout = dropout)
         
-    def call(self, inputs, train = False):
+    def call(self, inputs, training = False):
         input_img = inputs[0]
         anchor_map = inputs[1]
         anchor_valid_map = inputs[2]
@@ -35,7 +35,7 @@ class FasterRCNN(tf.keras.Model):
             gt_box_corners_map = inputs[5]
 
         #Stage 1: Feature Extraction
-        feature_map = self._stage1_feature_extractor(input_img = input_img, train = train)
+        feature_map = self._stage1_feature_extractor(input_img = input_img, training = training)
 
         #Stage 2: RPN generates proposal map for object
         rpn_scores, rpn_box_deltas, proposals = self._stage2_region_proposal_network(
@@ -43,10 +43,10 @@ class FasterRCNN(tf.keras.Model):
                                                             feature_map,
                                                             anchor_map,
                                                             anchor_valid_map],
-                                                    train = train)
+                                                    training = training)
         # If training, we must generate ground truth data for the detector stage
         # from RPN outputs
-        if train:
+        if training:
             # Assign labels to proposals and take random sample (for detector training)
             proposals, gt_classes, gt_box_deltas = self._label_proposals(proposals = proposals,
                                                                         gt_box_class_indexes = gt_box_class_indexes_map[0],
@@ -70,7 +70,7 @@ class FasterRCNN(tf.keras.Model):
         detector_classes, detector_box_deltas = self._stage3_detector_network(inputs = [input_img,
                                                                                         feature_map,
                                                                                         proposals],
-                                                                            train = train)
+                                                                            training = training)
 
         #Losses
         if train:
