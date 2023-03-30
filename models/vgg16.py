@@ -1,7 +1,8 @@
 import tensorflow as tf
-from tensorflow.keras import Model
-from tensorflow.keras.layers import Conv2D, MaxPooling2D
-from tensorflow.keras.initializers import glorot_normal
+from tensorflow import keras
+from keras import Model
+from keras.layers import Conv2D, MaxPooling2D
+from keras.initializers import glorot_normal
 
 class FeatureExtractor(tf.keras.Model):
     def __init__(self, l2 = 0):
