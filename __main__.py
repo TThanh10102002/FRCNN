@@ -206,7 +206,7 @@ def train(model):
     for epoch in range(1, 1 + options.epochs):
         print("Epoch %d/%d" % (epoch, options.epochs))
         stats = TrainingStatistics()
-        progbar = tqdm(iterable = iter(training_data), total = training_data.num_samples, postfix = stats.get-progbar_postfix())
+        progbar = tqdm(iterable = iter(training_data), total = training_data.num_samples, postfix = stats.get_progbar_postfix())
         for sample in progbar:
             x, img_data, gt_rpn_minibatch_map = _convert_training_sample_to_model_input(sample = sample, mode = "train")
             losses = model.train_on_batch(x = x, y = gt_rpn_minibatch_map, return_dict = True)
