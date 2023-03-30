@@ -37,7 +37,7 @@ class DetectorNet(Model):
         
         self._regressor = TimeDistributed(name = "classifier_boxes", layer = Dense(units = 4 * (num_classes - 1), activation = "linear", kernel_initializer = regressor_initializer))
 
-    def call(self, inputs, train):
+    def call(self, inputs, training):
         input_img = inputs[0]
         feature_map = inputs[1]
         proposals = inputs[2]
