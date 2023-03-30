@@ -57,7 +57,7 @@ class FasterRCNN(tf.keras.Model):
                                                                           gt_classes = gt_classes,
                                                                           gt_box_deltas = gt_box_deltas,
                                                                           max_proposals = 128,
-                                                                          positive_fraction = 0.25)
+                                                                          pos_fraction = 0.25)
             gt_classes = tf.expand_dims(gt_classes, axis = 0)
             gt_box_deltas = tf.expand_dims(gt_box_deltas, axis = 0)
 
