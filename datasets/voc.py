@@ -116,7 +116,7 @@ class Dataset:
 
     def _generate_training_sample(self, filepath, flip):
       # Load and preprocess the image
-      scaled_image_data, scaled_image, scale_factor, original_shape = images.load_image(url = filepath, min_dimension_pixels = 600, horizontal_flip = flip)
+      scaled_image_data, scaled_image, scale_factor, original_shape = images.load_img(url = filepath, min_dimension_pixels = 600, horizontal_flip = flip)
       _, original_height, original_width = original_shape
 
       # Scale ground truth boxes to new image size
