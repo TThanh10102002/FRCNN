@@ -68,7 +68,7 @@ def generate_anchor_maps(img_shape, f_pixels):
      # Generate (H,W,2) map of coordinates, in feature space, each being [y,x]
     x_coord = np.arange(width)
     y_coord = np.arange(height)
-    cell_coord = np.arange(np.meshgrid(y_coord, x_coord)).transpose([2, 1, 0])
+    cell_coord = np.array(np.meshgrid(y_coord, x_coord)).transpose([2, 1, 0])
 
     # Convert all coordinates to image space (pixels) at *center* of each cell
     center = cell_coord * f_pixels + 0.5 * f_pixels
