@@ -116,7 +116,7 @@ def _convert_training_sample_to_model_input(sample, mode):
     gt_box_class_indexes = np.array([box.class_index for box in sample.gt_boxes]).astype(np.int32)      #(num_boxes,), where each is an index [1,num_classes)
 
     #Expand all maps to a batch size of 1
-    img_data = np.expand_dims(sample.img_data, axis = 0)
+    img_data = np.expand_dims(sample.image_data, axis = 0)
     img_shape_map = np.array([[img_data.shape[1], img_data.shape[2], img_data.shape[3]]])       #(1,3), with (height,width,channels)
     anchor_map = np.expand_dims(sample.anchor_map, axis = 0)
     anchor_valid_map = np.expand_dims(sample.anchor_valid_map, axis = 0)
