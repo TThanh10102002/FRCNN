@@ -1,8 +1,11 @@
 import tensorflow as tf
-import tensorflow.keras
-from tensorflow.keras import Model
-from tensorflow.keras.layers import Conv2D
-from tensorflow.keras import backend as K
+from tensorflow import keras
+from keras import Model
+from keras.layers import Conv2D
+from keras import backend as K
+from keras.initializers import random_normal
+from keras.regularizers import l2
+from keras.losses import binary_crossentropy
 
 from . import math
 
@@ -17,19 +20,19 @@ class RegionProposalNetwork(tf.keras.Model):
         self._max_proposals_post_nms_infer = max_proposals_post_nms_infer
         self._allow_edge_proposals = allow_edge_proposals
 
-        regularizer = tf.keras.regularizers.l2(l2)
-        initial_weights = tf.keras.initializers.RandomNormal(mean = 0, stddev = 0.01, seed = None)
+        regularizer = l2(l2)
+        initial_weights = random_normal(mean = 0, stddev = 0.01, seed = None)
 
         anchors_per_location = 9
 
         # 3x3 convolution over input map producing 512-d result at each output. The center of each output is an anchor point (k anchors at each point).
-        self._rpn_conv1 = Conv2D(512, 3, 1, 'same', activation = 'relu', kernel_initializer = initial_weights, kernel_regularizer = regularizer, name = 'rpn_conv1')
+        self._rpn_conv1 = Conv2D(filters = 512, kernel_size = 3, strides = 1, padding = 'same', activation = 'relu', kernel_initializer = initial_weights, kernel_regularizer = regularizer, name = 'rpn_conv1')
         
         # Classification layer: predicts whether there is an object at the anchor or not. We use a sigmoid function, where > 0.5 is indicates a positive result.
-        self._rpn_class = Conv2D(anchors_per_location, 1, 1, 'same', activation = 'sigmoid', kernel_initializer = initial_weights, name = 'rpn_class')
+        self._rpn_class = Conv2D(filters = anchors_per_location, kernel_size = 1, strides = 1, padding = 'same', activation = 'sigmoid', kernel_initializer = initial_weights, name = 'rpn_class')
 
         # Box delta regression
-        self._rpn_boxes = Conv2D(4 * anchors_per_location, 1, 1, 'same', activation = None, kernel_initializer = initial_weights, name = 'rpn_boxes')
+        self._rpn_boxes = Conv2D(filters = 4 * anchors_per_location, kernel_size = 1, strides = 1, padding = 'same', activation = None, kernel_initializer = initial_weights, name = 'rpn_boxes')
 
     def __call__(self, inputs, training):
         # Unpack inputs
@@ -78,9 +81,9 @@ class RegionProposalNetwork(tf.keras.Model):
         img_height = tf.cast(tf.shape(input_img)[1], dtype = tf.float32)
         img_width = tf.cast(tf.shape(input_img)[2], dtype = tf.float32)
         proposals_top_left = tf.maximum(proposals[:, 0:2], 0.0)
-        proposals_y2 = tf.reshape(tf.minimum(proposals[:,2], img_height), shape = (-1, 1))
+        proposals_y2 = tf.reshape(tf.minimum(proposals[:,2], img_height), shape = (-1, 1))      # slice operation produces [N,], reshape to [N,1]
         proposals_x2 = tf.reshape(tf.minimum(proposals[:,3], img_width), shape = (-1, 1))
-        proposals = tf.concat([proposals_top_left, proposals_y2, proposals_x2], axis = 1)
+        proposals = tf.concat([proposals_top_left, proposals_y2, proposals_x2], axis = 1)       # [N,4] proposal tensor
 
         # Remove anything less than 16 pixels on a side
         height = proposals[:, 2] - proposals[:, 0]
@@ -160,7 +163,7 @@ class RegionProposalNetwork(tf.keras.Model):
         N_cls = tf.cast(tf.math.count_nonzero(y_mask), dtype = tf.float32) + K.epsilon()
 
         # Compute element-wise loss for all anchors
-        loss_all_anchors = tf.cast(tf.keras.losses.BinaryCrossentropy()(y_true_class, y_pred_class), dtype = tf.float32)
+        loss_all_anchors = binary_crossentropy(y_true_class, y_pred_class)
 
         # Zero out the ones which should not have been included
         loss_terms = y_mask * loss_all_anchors
@@ -197,8 +200,8 @@ class RegionProposalNetwork(tf.keras.Model):
 
         # Include only anchors that are used in the mini-batch and which correspond
         # to objects (positive samples)
-        y_choose = tf.reshape(gt_rpn_map[:, :, :, :, 0], shape = tf.shape(gt_rpn_map)[0:4])
-        y_positive = tf.reshape(gt_rpn_map[:, :, :, :, 1], shape = tf.shape(gt_rpn_map)[0:4])
+        y_choose = tf.reshape(gt_rpn_map[:, :, :, :, 0], shape = tf.shape(gt_rpn_map)[0:4])         # trainable anchors map: (batch_size, height, width, num_anchors)
+        y_positive = tf.reshape(gt_rpn_map[:, :, :, :, 1], shape = tf.shape(gt_rpn_map)[0:4])       # positive anchors
         y_mask = y_choose * y_positive
 
         # y_mask is of the wrong shape. We have one value per (y,x,k) position but in
