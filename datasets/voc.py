@@ -139,7 +139,7 @@ class Dataset:
         scaled_gt_boxes.append(scaled_box)
 
       # Generate anchor maps and RPN truth map
-      anchor_map, anchor_valid_map = anchors.generate_anchor_maps(image_shape = scaled_image_data.shape, feature_pixels = self._feature_pixels)
+      anchor_map, anchor_valid_map = anchors.generate_anchor_maps(img_shape = scaled_image_data.shape, f_pixels = self._feature_pixels)
       gt_rpn_map, gt_rpn_object_indices, gt_rpn_background_indices = anchors.generate_rpn_map(anchor_map = anchor_map, anchor_valid_map = anchor_valid_map, gt_boxes = scaled_gt_boxes)
 
       # Return sample
