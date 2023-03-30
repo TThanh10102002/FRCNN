@@ -11,11 +11,11 @@ class RegionProposalNetwork(tf.keras.Model):
     def __init__(self, max_proposals_pre_nms_train, max_proposals_post_nms_train, max_proposals_pre_nms_infer, max_proposals_post_nms_infer, l2 = 0, allow_edge_proposals = False):
         super().__init__()
 
-        self.max_proposals_pre_nms_train = max_proposals_pre_nms_train
-        self.max_proposals_post_nms_train = max_proposals_post_nms_train
-        self.max_proposals_pre_nms_infer = max_proposals_pre_nms_infer
-        self.max_proposals_post_nms_infer = max_proposals_post_nms_infer
-        self.allow_edge_proposals = allow_edge_proposals
+        self._max_proposals_pre_nms_train = max_proposals_pre_nms_train
+        self._max_proposals_post_nms_train = max_proposals_post_nms_train
+        self._max_proposals_pre_nms_infer = max_proposals_pre_nms_infer
+        self._max_proposals_post_nms_infer = max_proposals_post_nms_infer
+        self._allow_edge_proposals = allow_edge_proposals
 
         regularizer = tf.keras.regularizers.l2(l2)
         initial_weights = tf.keras.initializers.RandomNormal(mean = 0, stddev = 0.01, seed = None)
@@ -41,11 +41,11 @@ class RegionProposalNetwork(tf.keras.Model):
 
         # Proposal sampling depends on whether we are training or not
         if training:
-            max_proposals_pre_nms = self.max_proposals_pre_nms_train
-            max_proposals_post_nms = self.max_proposals_post_nms_train
+            max_proposals_pre_nms = self._max_proposals_pre_nms_train
+            max_proposals_post_nms = self._max_proposals_post_nms_train
         else:
-            max_proposals_pre_nms = self.max_proposals_pre_nms_infer
-            max_proposals_post_nms = self.max_proposals_post_nms_infer
+            max_proposals_pre_nms = self._max_proposals_pre_nms_infer
+            max_proposals_post_nms = self._max_proposals_post_nms_infer
 
         # Pass through network
         y = self._rpn_conv1(feature_map)
