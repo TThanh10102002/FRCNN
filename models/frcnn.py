@@ -312,7 +312,7 @@ class FasterRCNN(tf.keras.Model):
         gt_box_delta_values = tf.tile(box_delta_targets, multiples = [1, num_classes - 1])      #populate regression targets with straightforward repetition of each row (only those columns corresponding to class will be masked on)
         gt_box_delta_masks = tf.expand_dims(gt_box_delta_masks, axis = 0)       #(N,4*(C-1)) -> (1,N,4*(C-1))
         gt_box_delta_values = tf.expand_dims(gt_box_delta_values, axis = 0)     #(N,4*(C-1)) -> (1,N,4*(C-1))
-        gt_box_deltas = tf.concat([gt_box_delta_mask, gt_box_delta_values], 0)   #(2,N,4*(C-1))
+        gt_box_deltas = tf.concat([gt_box_delta_masks, gt_box_delta_values], 0)   #(2,N,4*(C-1))
         gt_box_deltas = tf.transpose(gt_box_deltas, perm = [1, 0, 2])           #(N,2,4*(C-1))
 
         return proposals, gt_classes, gt_box_deltas
