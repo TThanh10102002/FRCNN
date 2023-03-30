@@ -52,7 +52,7 @@ def generate_anchor_maps(img_shape, f_pixels):
             are valid (1) or invalid (0). Invalid anchors are those that cross
             image boundaries and must not be used during training.
     """
-    assert img_shape == 3
+    assert len(img_shape) == 3
 
     # Base anchor template: (num_anchors,4), with each anchor being specified by
     # its corners (y1,x1,y2,x2)
