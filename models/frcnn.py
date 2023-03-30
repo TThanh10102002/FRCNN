@@ -29,7 +29,7 @@ class FasterRCNN(tf.keras.Model):
         input_img = inputs[0]
         anchor_map = inputs[1]
         anchor_valid_map = inputs[2]
-        if train:
+        if training:
             gt_rpn_map = inputs[3]
             gt_box_class_indexes_map = inputs[4]
             gt_box_corners_map = inputs[5]
