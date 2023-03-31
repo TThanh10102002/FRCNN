@@ -4,8 +4,8 @@ from keras import Model
 from keras.layers import Dense, Dropout, Flatten, Lambda, TimeDistributed
 from keras import backend as K
 from keras.regularizers import L2
-from keras.initializers import RandomNormal
-from keras.losses import SparseCategoricalCrossentropy
+from keras.initializers import random_normal
+from keras.losses import CategoricalCrossentropy
 from tensorflow import math
 
 
@@ -21,8 +21,8 @@ class DetectorNet(Model):
         self._dropout = dropout
 
         regularizer = L2(l2)
-        class_initializer = RandomNormal(mean = 0.0, stddev = 0.01)
-        regressor_initializer = RandomNormal(mean = 0.0, stddev = 0.01)
+        class_initializer = random_normal(mean = 0.0, stddev = 0.01)
+        regressor_initializer = random_normal(mean = 0.0, stddev = 0.01)
 
         self._roi_pool = RoIPoolingLayer(pool_size=7, name = 'custom_roi_pool') if custom_roi_pool else None
 
@@ -50,7 +50,7 @@ class DetectorNet(Model):
             roi_corners = tf.minimum(proposals // 16, map_lim)
             roi_corners = tf.maximum(roi_corners, 0)
             roi_dim = roi_corners[:, 2:4] - roi_corners[:, 0:2] + 1
-            rois = tf.concat([roi_corners[:, 0:2], roi_dim], 1)
+            rois = tf.concat([roi_corners[:, 0:2], roi_dim], axis = 1)
             rois = tf.expand_dims(rois, axis = 0)
             pool = RoIPoolingLayer(pool_size=7, name = "roi_pool")([feature_map, rois])
         else:
@@ -59,7 +59,7 @@ class DetectorNet(Model):
             rois = proposals / [img_height, img_width, img_height, img_width]
 
             num_rois = tf.shape(rois)[0]
-            region = tf.image.crop_and_resize(image = feature_map, boxes =rois, box_indices = tf.zeros(num_rois, dtype = tf.int32), crop_size = [14, 14])
+            region = tf.image.crop_and_resize(image = feature_map, boxes = rois, box_indices = tf.zeros(num_rois, dtype = tf.int32), crop_size = [14, 14])
             pool = tf.nn.max_pool(region, ksize = [1, 2, 2, 1], strides = [1, 2, 2, 1], padding = 'SAME')
             pool = tf.expand_dims(pool, axis = 0)
             
@@ -85,9 +85,9 @@ class DetectorNet(Model):
         scale_factor = 1.0
         N = tf.cast(tf.shape(y_true)[1], dtype = tf.float32) + K.epsilon()
         if from_logits:
-            return scale_factor * math.reduce_sum(SparseCategoricalCrossentropy(from_logits = True)(y_true, y_pred)) / N
+            return scale_factor * math.reduce_sum(CategoricalCrossentropy(from_logits = True)(y_true, y_pred)) / N
         else:
-            return scale_factor * math.reduce_sum(SparseCategoricalCrossentropy()(y_true, y_pred)) / N
+            return scale_factor * math.reduce_sum(CategoricalCrossentropy()(y_true, y_pred)) / N
 
     @staticmethod
     def reg_loss(y_pred, y_true):
@@ -103,9 +103,9 @@ class DetectorNet(Model):
         is_negative_branch = tf.stop_gradient(tf.cast(tf.less(abs_x, 1.0 / squared_sigma), dtype = tf.float32))
         R_negative_branch = 0.5 * x * x * squared_sigma
         R_positive_branch = abs_x - 0.5 / squared_sigma
-        losses = is_negative_branch * R_negative_branch + (1 - is_negative_branch) * R_positive_branch
+        losses = is_negative_branch * R_negative_branch + (1.0 - is_negative_branch) * R_positive_branch
 
-        N = tf.cast(tf.shape(y_true), dtype = tf.float32) + K.epsilon()
+        N = tf.cast(tf.shape(y_true)[1], dtype = tf.float32) + K.epsilon()
         loss_terms = y_mask * losses
         return scale_factor * math.reduce_sum(loss_terms) / N
 
