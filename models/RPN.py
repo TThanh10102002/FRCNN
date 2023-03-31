@@ -4,7 +4,7 @@ from keras import Model
 from keras.layers import Conv2D
 from keras import backend as K
 from keras.initializers import random_normal
-from keras.regularizers import l2
+from keras.regularizers import L2
 from keras.losses import binary_crossentropy
 
 from . import math
@@ -20,7 +20,7 @@ class RegionProposalNetwork(tf.keras.Model):
         self._max_proposals_post_nms_infer = max_proposals_post_nms_infer
         self._allow_edge_proposals = allow_edge_proposals
 
-        regularizer = l2(l2)
+        regularizer = L2(l2)
         initial_weights = random_normal(mean = 0, stddev = 0.01, seed = None)
 
         anchors_per_location = 9
