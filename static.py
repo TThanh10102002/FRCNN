@@ -31,7 +31,7 @@ class TrainingStatistics:
         self._rpn_class_losses.append(losses["rpn_class_loss"])
         self._rpn_reg_losses.append(losses["rpn_reg_loss"])
         self._detector_class_losses.append(losses["detector_class_loss"])
-        self._detector_reg_losses.append("detector_reg_loss")
+        self._detector_reg_losses.append(losses["detector_reg_loss"])
         self.rpn_class_loss = np.mean(self._rpn_class_losses)
         self.rpn_reg_loss = np.mean(self._rpn_reg_losses)
         self.detector_class_loss = np.mean(self._detector_class_losses)
@@ -50,6 +50,7 @@ class TrainingStatistics:
                 "rpn_reg_loss": "%1.4f" % self.rpn_reg_loss,
                 "detector_class_loss": "%1.4f" % self.detector_class_loss,
                 "detector_reg_loss": "%1.4f" % self.detector_reg_loss
+                "total_loss": "%1.2f" % (self.rpn_class_loss + self.rpn_reg_loss + self.detector_class_loss + self.detector_reg_loss)
         }
     
 
@@ -84,13 +85,13 @@ class PrecisionRecallCurveCalculator:
             for gt_index in range(len(gt_boxes_this_class)):
                 for box_index in range(len(scored_boxes)):
                     box_1 = np.expand_dims(scored_boxes[box_index][0:4], axis = 0)  #convert single box (4,) to (1,4), as expected by parallel IoU function
-                    box_2 = np.expand_dims(gt_boxes_this_class[gt_index].corners, axis=0)
+                    box_2 = np.expand_dims(gt_boxes_this_class[gt_index].corners, axis = 0)
                     iou = iou(box_1, box_2)
                     ious.append((iou, box_index, gt_index))
             ious = sorted(ious, key = lambda iou: ious[0], reverse = True)  #sort descending by IoU
 
             # Vector that indicates whether a ground truth box has been detected
-            gt_box_detected = [ False ] * len(gt_boxes)
+            gt_box_detected = [False] * len(gt_boxes)
 
             #Vector that indicates wheter a prediction is a true pos or false neg
             is_true_positive = [False] * len(scored_boxes)
@@ -241,7 +242,7 @@ class PrecisionRecallCurveCalculator:
         labels, average_precisions = zip(*sorted_results)   #unzip
 
         #Convert to %
-        average_precisions = np.array(average_precision) * 100.0
+        average_precisions = np.array(average_precisions) * 100.0
 
         #Bar plot
         plt.clf()
