@@ -1,8 +1,50 @@
+#
+# Faster R-CNN in PyTorch and TensorFlow 2 w/ Keras
+# tf2/FasterRCNN/models/faster_rcnn.py
+# Copyright 2021-2022 Bart Trzynadlowski
+#
+# TensorFlow/Keras implementation of Faster R-CNN training and inference
+# models. Here, all stages of Faster R-CNN are instantiated, ground truth
+# labels from RPN proposal boxes (RoIs) for the detector stage are generated,
+# and proposals are sampled.
+#
+
+#
+# Weight Decay
+# ------------
+# Keras does not provide a weight decay option but rather an L2 penalty. Weight
+# decay can be converted to L2 by dividing by 2. This is because the L2 penalty
+# is added to the loss and then differentiated with respect to the weights
+# (introducing a factor of 2 that must be canceled out). See:
+# https://bbabenko.github.io/weight-decay/
+#
+# Pro-Tip
+# -------
+#
+# To log the output of Keras layers using tf.print, use K.Lambda as below:
+#
+#   def do_log1(x):
+#     tf.print("best_ious=", x, output_stream = "file:///projects/FasterRCNN/tf2/out.txt", summarize = -1)
+#     return x
+#   best_ious = Lambda(do_log1)(best_ious)
+#
+#   def do_log(x):
+#     y_predicted = x[0]
+#     y_true = x[1]
+#     loss = K.mean(K.categorical_crossentropy(target = y_true, output = y_predicted, from_logits = True))
+#     tf.print("loss=", loss, "y_predicted=", y_predicted, output_stream = "file:///projects/FasterRCNN/tf2/out.txt", summarize = -1)
+#     return y_predicted
+#   y_predicted = Lambda(do_log)((y_predicted, y_true))
+#
+# output_stream may also be a file stream like sys.stdout.
+#
+
 import numpy as np
 import tensorflow as tf
-import tensorflow.keras
-from tensorflow.keras import Model
-from tensorflow.keras.layers import Lambda
+from tensorflow import keras
+from keras import Model
+from keras.layers import Lambda
+from keras.applications import VGG16
 
 from . import vgg16
 from . import RPN
@@ -88,10 +130,10 @@ class FasterRCNN(tf.keras.Model):
             self.add_metric(detector_reg_loss, name = 'detector_reg_loss')
         else:
             #Losses cannot be computed during inference and should be ignored
-            rpn_class_loss = float('inf')
-            rpn_reg_loss = float('inf')
-            detector_class_loss = float('inf')
-            detector_reg_loss = float('inf')
+            rpn_class_loss = float("inf")
+            rpn_reg_loss = float("inf")
+            detector_class_loss = float("inf")
+            detector_reg_loss = float("inf")
 
         #Return outputs
         return[
@@ -142,7 +184,7 @@ class FasterRCNN(tf.keras.Model):
         feature extractor convolutional layers as well as the two fully connected
         layers in the detector stage.
         """
-        pretrained_vgg16_model = tf.keras.applications.VGG16(weights = "imagenet")
+        pretrained_vgg16_model = VGG16(weights = "imagenet")
         for pretrained_layer in pretrained_vgg16_model.layers:
             weights = pretrained_layer.get_weights()
             if len(weights) > 0:
@@ -155,9 +197,9 @@ class FasterRCNN(tf.keras.Model):
 
     def _predictions_to_scored_boxes(self, input_img, classes, box_deltas, proposals, score_threshold):
         #Eliminate batch dimension
-        input_img = np.squeeze(input_img, 0)
-        classes = np.squeeze(classes, 0)
-        box_deltas = np.squeeze(box_deltas, 0)
+        input_img = np.squeeze(input_img, axis = 0)
+        classes = np.squeeze(classes, axis = 0)
+        box_deltas = np.squeeze(box_deltas, axis = 0)
 
         #Convert logits to probability distribution if using logits mode
         if not self._activate_class_outputs:
@@ -175,7 +217,7 @@ class FasterRCNN(tf.keras.Model):
             #Get the regression parameters (ty, tx, th, tw) corresponding to this
             #class, for all proposals
             box_delta_index = (class_index - 1) * 4
-            box_delta_params = box_deltas[:, (box_delta_index) : (box_delta_index + 4)]     #(N, 4)
+            box_delta_params = box_deltas[:, (box_delta_index + 0) : (box_delta_index + 4)]     #(N, 4)
             proposal_boxes_in_class = math.convert_deltas_to_boxes(box_deltas = box_delta_params,
                                                           anchors = proposal_anchors,
                                                           box_delta_means = [0.0, 0.0, 0.0, 0.0],
@@ -183,7 +225,7 @@ class FasterRCNN(tf.keras.Model):
             
             #Clip to image boundaries
             proposal_boxes_in_class[:, 0::2] = np.clip(proposal_boxes_in_class[:, 0::2], 0, input_img.shape[0] - 1)    #clip y1 and y2 to [0,height)
-            proposal_boxes_in_class[:, 2::4] = np.clip(proposal_boxes_in_class[:, 2::4], 0, input_img.shape[1] - 1)    #clip x1 and x2 to [0,width)
+            proposal_boxes_in_class[:, 1::2] = np.clip(proposal_boxes_in_class[:, 1::2], 0, input_img.shape[1] - 1)    #clip x1 and x2 to [0,width)
 
             #Get the scores for this class. The class scores are returned in normalized categorical form. Each row corresponds to a class.
             scores_in_class = classes[:,class_index]
@@ -202,6 +244,7 @@ class FasterRCNN(tf.keras.Model):
                                                    max_output_size = proposals.shape[0],
                                                    iou_threshold = 0.3)
             indexes = indexes.numpy()
+            boxes = boxes[indexes]
             scores = np.expand_dims(scores[indexes], axis = 0)      # (N,) -> (N,1)
             scored_boxes = np.hstack([boxes, scores.T])             # (N,5), with each row: (y1, x1, y2, x2, score)
             scores_boxes_by_class_index[class_index] = scored_boxes
@@ -252,7 +295,7 @@ class FasterRCNN(tf.keras.Model):
         #truth boxes exactly. This isn't strictly necessary and the model should
         #work without it but it will help training and will ensure that there are
         #always some positive examples to train on.
-        proposals = tf.concat([proposals, gt_box_corners], 0)
+        proposals = tf.concat([proposals, gt_box_corners], axis = 0)
 
         #Compute IoU between each proposal (N,4) and each ground truth box (M,4)
         #-> (N, M)
@@ -260,7 +303,7 @@ class FasterRCNN(tf.keras.Model):
 
         #Find the best IoU for each proposal, the class of the ground truth box
         #associated with it, and the box corners
-        best_ious = tf.math.reduce_max(ious, axis = 1)      #(N,) of maximum IoUs for each of the N proposals
+        best_ious = tf.math.reduce_max(ious, axis = 1)        #(N,) of maximum IoUs for each of the N proposals
         box_indexes = tf.math.argmax(ious, axis = 1)          #(N,) of ground truth box index for each proposal
         gt_box_class_indexes = tf.gather(gt_box_class_indexes, indices = box_indexes)   #(N,) of class indices of highest-IoU box for each proposal
         gt_box_corners = tf.gather(gt_box_corners, indices = box_indexes)               #(N,4) of box corners of highest-IoU box for each proposal
@@ -289,7 +332,7 @@ class FasterRCNN(tf.keras.Model):
         proposal_centers = 0.5 * (proposals[:,0:2] + proposals[:,2:4])          #center_y, center_x
         proposal_sides = proposals[:,2:4] - proposals[:,0:2]                    #height, width
         gt_box_centers = 0.5 * (gt_box_corners[:,0:2] + gt_box_corners[:,2:4])  #center_y, center_x
-        gt_box_sides = gt_box_corners[:,2:4] - gt_box_corners[:,0:2]             #height, width
+        gt_box_sides = gt_box_corners[:,2:4] - gt_box_corners[:,0:2]            #height, width
 
         #Compute regression targets (ty, tx, th, tw) for each proposal based on
         #the best box selected
@@ -300,7 +343,7 @@ class FasterRCNN(tf.keras.Model):
         #th = log(gt_height / proposal_height), tw = (gt_width / proposal_width)
         th_tw = tf.math.log(gt_box_sides / proposal_sides)
         #(N,4) box delta regression targets tensor
-        box_delta_targets = tf.concat([ty_tx, th_tw], 1)
+        box_delta_targets = tf.concat([ty_tx, th_tw], axis = 1)
         # mean and standard deviation adjustment
         box_delta_targets = (box_delta_targets - detector_box_delta_means) / detector_box_delta_stds
 
@@ -310,10 +353,10 @@ class FasterRCNN(tf.keras.Model):
         #Background class 0 is not present at all.
         gt_box_delta_masks = tf.repeat(gt_classes, repeats = 4, axis = 1)[:,4:]                 #create masks using interleaved repetition, remembering to discard class 0
         gt_box_delta_values = tf.tile(box_delta_targets, multiples = [1, num_classes - 1])      #populate regression targets with straightforward repetition of each row (only those columns corresponding to class will be masked on)
-        gt_box_delta_masks = tf.expand_dims(gt_box_delta_masks, axis = 0)       #(N,4*(C-1)) -> (1,N,4*(C-1))
-        gt_box_delta_values = tf.expand_dims(gt_box_delta_values, axis = 0)     #(N,4*(C-1)) -> (1,N,4*(C-1))
-        gt_box_deltas = tf.concat([gt_box_delta_masks, gt_box_delta_values], 0)   #(2,N,4*(C-1))
-        gt_box_deltas = tf.transpose(gt_box_deltas, perm = [1, 0, 2])           #(N,2,4*(C-1))
+        gt_box_delta_masks = tf.expand_dims(gt_box_delta_masks, axis = 0)                       #(N,4*(C-1)) -> (1,N,4*(C-1))
+        gt_box_delta_values = tf.expand_dims(gt_box_delta_values, axis = 0)                     #(N,4*(C-1)) -> (1,N,4*(C-1))
+        gt_box_deltas = tf.concat([gt_box_delta_masks, gt_box_delta_values], axis = 0)          #(2,N,4*(C-1))
+        gt_box_deltas = tf.transpose(gt_box_deltas, perm = [1, 0, 2])                           #(N,2,4*(C-1))
 
         return proposals, gt_classes, gt_box_deltas
 
@@ -322,7 +365,7 @@ class FasterRCNN(tf.keras.Model):
             return proposals, gt_classes, gt_box_deltas
         
         #Get positive and negative (background) proposals
-        class_indices = tf.argmax(gt_classes, axis = 1)         #(N,num_classes) -> (N,), where each element is the class index (highest score from its row)
+        class_indices = tf.argmax(gt_classes, axis = 1)                     #(N,num_classes) -> (N,), where each element is the class index (highest score from its row)
         pos_indices = tf.squeeze(tf.where(class_indices > 0), axis = 1)     #(P,), tensor of P indices (the positive, non-background classes in class_indices)
         neg_indices = tf.squeeze(tf.where(class_indices <= 0), axis = 1)    #(N,), tensor of N indices (the negative, background classes in class_indices)
         num_pos_proposals = tf.size(pos_indices)
@@ -345,7 +388,7 @@ class FasterRCNN(tf.keras.Model):
         #Sample randomly
         pos_sample_indices = tf.random.shuffle(pos_indices)[:num_pos_samples]
         neg_sample_indices = tf.random.shuffle(neg_indices)[:num_neg_samples]
-        indices = tf.concat([pos_sample_indices, neg_sample_indices], 0)
+        indices = tf.concat([pos_sample_indices, neg_sample_indices], axis = 0)
 
         #My initial PyTorch version was careful to return empty tensors if there
         #were no positive samples or no negative samples. Because TF2/Keras is awful
