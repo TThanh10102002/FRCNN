@@ -238,7 +238,7 @@ def train(model):
         }
             log_items.update(stats.get_progbar_postfix())
             csv.log(log_items)
-        if options.best_save_to:
+        if options.save_best_to:
             best_weights_tracker.on_epoch_end(model = model, mAP = mean_avg_precision)
     if options.save_to:
         model.save_weights(filepath = options.save_to, overwrite = True, save_format = "h5")
