@@ -86,7 +86,7 @@ class PrecisionRecallCurveCalculator:
                 for box_index in range(len(scored_boxes)):
                     box_1 = np.expand_dims(scored_boxes[box_index][0:4], axis = 0)  #convert single box (4,) to (1,4), as expected by parallel IoU function
                     box_2 = np.expand_dims(gt_boxes_this_class[gt_index].corners, axis = 0)
-                    intersection_over_union = iou(box_1, box_2)
+                    intersection_over_union = iou(box1 = box_1, box2 = box_2)
                     ious.append((intersection_over_union, box_index, gt_index))
             ious = sorted(ious, key = lambda iou: ious[0], reverse = True)  #sort descending by IoU
 
