@@ -3,7 +3,7 @@ import tensorflow as tf
 
 
 #Compute IoU for multibox parallel
-def iou(box1, box2):
+def intersection_over_union(box1, box2):
     """
       Computes intersection-over-union (IoU) for multiple boxes in parallel.
       Parameters
