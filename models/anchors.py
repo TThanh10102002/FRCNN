@@ -166,7 +166,7 @@ def generate_rpn_map(anchor_map, anchor_valid_map, gt_boxes, obj_iou_threshold =
     gt_box_assign = np.full(box_num, -1)
 
     # Compute IoU between each anchor and each ground truth box, (N,M).
-    ious = math.iou(box1=anchors, box2=gt_box_corners)
+    ious = math.intersection_over_union(box1=anchors, box2=gt_box_corners)
 
     #wipe IoU scores of invalid anchors (straddle image boundaries)
     ious[anchor_valid_map.flatten() == 0, :] = -1.0
