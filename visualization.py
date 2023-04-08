@@ -32,7 +32,7 @@ def _draw_text(img, text, position, color, scale = 1.0, offset_lines = 0):
 def _class_to_color(class_index):
     return list(ImageColor.colormap.values())[class_index + 1]
 
-def show_anchors(output_path, img, anchor_map, anchor_valid_map, gt_rpn_map, gt_boxes, display = True):
+def show_anchors(output_path, img, anchor_map, anchor_valid_map, gt_rpn_map, gt_boxes, display = False):
     contours = ImageDraw.Draw(img, mode = "RGBA")
 
     #Draw all ground truth boxes with thick green lines
