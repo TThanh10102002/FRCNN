@@ -384,9 +384,9 @@ if __name__ == "__main__":
     elif options.eval:
         evaluate(model = model, plot = options.plot, print_avg_precisions = True)
     elif options.predict:
-        predict_one(model = model, url = model.predict, show_img = True, output_path = True)
+        predict_one(model = model, url = options.predict, show_img = True, output_path = True)
     elif options.predict_to_file:
-        predict_one(model = model, url = model.predict_to_file, show_img = False, output_path = "prediction.png")
+        predict_one(model = model, url = options.predict_to_file, show_img = False, output_path = "prediction.png")
     elif options.predict_all:
         predict_all(model = model, split = options.predict_all)
     elif not options.dump_anchors:
