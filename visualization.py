@@ -61,11 +61,11 @@ def show_anchors(output_path, img, anchor_map, anchor_valid_map, gt_rpn_map, gt_
 def show_detections(output_path, show_img, img, scored_boxes_by_class_index, class_index_to_name):
     #Draw all results
     contours = ImageDraw.Draw(img, mode = "RGBA")
-    #color_index = 0
+    color_index = 0
     for class_index, scored_boxes in scored_boxes_by_class_index.items():
         for i in range(scored_boxes.shape[0]):
             scored_box = scored_boxes[i,:]
-            class_name = class_index_to_name
+            class_name = class_index_to_name[class_index]
             text = "%s %1.2f" % (class_name, scored_box[4])
             color = _class_to_color(class_index = class_index)
             _draw_rectangle(contours = contours, corners = scored_box[0:4], color = color, thickness = 2)
