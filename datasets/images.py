@@ -1,5 +1,6 @@
 from PIL import Image
 import numpy as np
+import imageio
 
 
 def compute_scale_factor(org_width, org_height, min_dim_pixels):
@@ -42,8 +43,8 @@ def load_img(url, min_dim_pixels = None, horizontal_flip = False):
         object suitable for drawing and visualization; scaling factor applied to
         the image dimensions; and the original image shape.
       """
-    data = Image.open(url)
-    img = Image.fromarray(data, mode='RGB')
+    data = imageio.imread(url, pilmode = "RGB")
+    img = Image.fromarray(data, mode= "RGB")
     org_width, org_height = img.width, img.height
     if horizontal_flip:
         img = img.transpose(method=Image.FLIP_LEFT_RIGHT)
@@ -54,7 +55,6 @@ def load_img(url, min_dim_pixels = None, horizontal_flip = False):
         img = img.resize((width, height), resample=Image.BILINEAR)
     else:
         scale_factor = 1.0
-
     img_data = np.array(img).astype(np.float32)
     img_data = preprocess_vgg16(image=img_data)
     return img_data, img, scale_factor, (img_data.shape[0], org_height, org_width)
