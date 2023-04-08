@@ -25,15 +25,15 @@ from . import visualization
 
 
 def render_anchors():
-    train_dataa = voc.Dataset(dir = options.dataset_dir, split = options.train_split, augment = False, shuffle = False)
+    train_data = voc.Dataset(dir = options.dataset_dir, split = options.train_split, augment = False, shuffle = False)
     if not os.path.exists(options.dump_anchors):
         os.makedirs(options.dump_anchors)
     print("Rendering anchors from '%s' to set '%s'..." % (options.train_split, options.dump_anchors))
-    for sample in iter(train_dataa):
+    for sample in iter(train_data):
         output_path = os.path.join(options.dump_anchors, "anchors_" + os.path.basename(sample.filepath) + ".png")
         visualization.show_anchors(
             output_path = output_path,
-            img = sample.image,
+            img = sample.img,
             anchor_map = sample.anchor_map,
             anchor_valid_map = sample.anchor_valid_map,
             gt_rpn_map = sample.gt_rpn_map,
