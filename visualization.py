@@ -43,7 +43,7 @@ def show_anchors(output_path, img, anchor_map, anchor_valid_map, gt_rpn_map, gt_
     for y in range(anchor_valid_map.shape[0]):
         for x in range(anchor_valid_map.shape[1]):
             for channel in range(anchor_valid_map.shape[2]):
-                if anchor_valid_map[y, x, channel] <= 0 or gt_rpn_map[y, x, channel] <= 0:
+                if anchor_valid_map[y, x, channel] <= 0 or gt_rpn_map[y, x, channel, 0] <= 0:
                     continue        #skip anchors excluded from training
                 if gt_rpn_map[y, x, channel, 1] < 1:
                     continue        #skip background anchors
