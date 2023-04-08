@@ -43,7 +43,7 @@ def load_img(url, min_dim_pixels = None, horizontal_flip = False):
         object suitable for drawing and visualization; scaling factor applied to
         the image dimensions; and the original image shape.
       """
-    data = imageio.imread(url, format = "JPG")
+    data = imageio.imread(url, pilmode = "RGB")
     img = Image.fromarray(data, mode= "RGB")
     org_width, org_height = img.width, img.height
     if horizontal_flip:
