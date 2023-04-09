@@ -60,7 +60,7 @@ def generate_anchor_maps(img_shape, f_pixels):
     anchors_num = anchors_size.shape[0]
     anchors_template = np.empty((anchors_num, 4))
     anchors_template[:, 0:2] = -0.5 * anchors_size
-    anchors_template[:, 2:4] = 0.5 * anchors_size
+    anchors_template[:, 2:4] = +0.5 * anchors_size
 
     # Shape of map, (H,W), determined by VGG-16 backbone
     height, width = img_shape[0] // f_pixels, img_shape[1] // f_pixels
