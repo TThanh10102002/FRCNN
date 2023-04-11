@@ -22,7 +22,7 @@ class DetectorNet(Model):
 
         regularizer = L2(l2)
         class_initializer = random_normal(mean = 0.0, stddev = 0.01)
-        regressor_initializer = random_normal(mean = 0.0, stddev = 0.01)
+        regressor_initializer = random_normal(mean = 0.0, stddev = 0.001)
 
         self._roi_pool = RoIPoolingLayer(pool_size=7, name = 'custom_roi_pool') if custom_roi_pool else None
 
@@ -58,7 +58,7 @@ class DetectorNet(Model):
             img_width = tf.shape(input_img)[2]
             rois = proposals / [img_height, img_width, img_height, img_width]
 
-            num_rois = tf.shape(rois)[0]
+            num_rois = tf.shape(rois)[0];
             region = tf.image.crop_and_resize(image = feature_map, boxes = rois, box_indices = tf.zeros(num_rois, dtype = tf.int32), crop_size = [14, 14])
             pool = tf.nn.max_pool(region, ksize = [1, 2, 2, 1], strides = [1, 2, 2, 1], padding = 'SAME')
             pool = tf.expand_dims(pool, axis = 0)
