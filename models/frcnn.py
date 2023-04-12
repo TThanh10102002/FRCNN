@@ -51,7 +51,7 @@ from . import RPN
 from . import detector
 from . import math
 
-class FasterRCNN(tf.keras.Model):
+class FasterRCNN(Model):
     def __init__(self, num_classes, allow_edge_proposals, custom_roi_pool, activate_class_outputs, l2 = 0, dropout = 0):
         super().__init__()
         self._num_classes = num_classes
