@@ -13,8 +13,8 @@ def compute_scale_factor(org_width, org_height, min_dim_pixels):
     return scale_factor
 
 
-def preprocess_vgg16(image):
-    img_data = image[:,:,::-1]
+def preprocess_vgg16(img_data):
+    img_data = img_data[:,:,::-1]
     img_data[:,:,0] -= 103.939
     img_data[:,:,1] -= 116.779
     img_data[:,:,2] -= 123.680
@@ -49,12 +49,12 @@ def load_img(url, min_dim_pixels = None, horizontal_flip = False):
     if horizontal_flip:
         img = img.transpose(method=Image.FLIP_LEFT_RIGHT)
     if min_dim_pixels is not None:
-        scale_factor = compute_scale_factor(org_width=org_width, org_height=org_height, min_dim_pixels=min_dim_pixels)
+        scale_factor = compute_scale_factor(org_width=img.width, org_height=img.height, min_dim_pixels=min_dim_pixels)
         width = int(img.width * scale_factor)
         height = int(img.height * scale_factor)
         img = img.resize((width, height), resample=Image.BILINEAR)
     else:
         scale_factor = 1.0
     img_data = np.array(img).astype(np.float32)
-    img_data = preprocess_vgg16(image=img_data)
+    img_data = preprocess_vgg16(img_data=img_data)
     return img_data, img, scale_factor, (img_data.shape[0], org_height, org_width)
