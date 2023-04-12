@@ -3,13 +3,14 @@ from tensorflow import keras
 from keras import Model
 from keras.layers import Conv2D, MaxPooling2D
 from keras.initializers import glorot_normal
+from keras.regularizers import L2
 
 class FeatureExtractor(tf.keras.Model):
     def __init__(self, l2 = 0):
         super().__init__()
         
         initial_weights = glorot_normal()
-        regularizer = tf.keras.regularizers.l2(l2)
+        regularizer = L2(l2)
         input_shape = (None, None, 3)
 
         self._block1_conv1 = Conv2D(input_shape = input_shape, filters = 64, kernel_size = 3, strides = 1, padding = 'same', activation = 'relu', kernel_initializer = initial_weights, trainable = False, name = 'block1_conv1')
